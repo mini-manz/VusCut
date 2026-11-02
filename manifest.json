@@ -1,0 +1,10 @@
+{
+  "version": "0.4.0",
+  "files": [
+    "styles/app.css",
+    "core/app.js",
+    "tools/trim.js",
+    "tools/filters.js",
+    "tools/text.js"
+  ]
+}

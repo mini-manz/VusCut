@@ -1,0 +1,23 @@
+*{box-sizing:border-box}
+body{display:grid;grid-template:"top top" 44px "main side" 1fr "tl tl" 150px/1fr 280px;height:100vh}
+header{grid-area:top;display:flex;align-items:center;gap:8px;padding:0 12px;background:#161920;border-bottom:1px solid #23262e}
+header b{margin-right:auto}
+button,input,select{font:inherit;color:inherit}
+button{background:#23262e;border:1px solid #30343f;border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{background:#2c303b}
+button.pri{background:#4a64d8;border-color:#4a64d8}
+#main{grid-area:main;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;min-width:0}
+#cv{max-width:100%;max-height:calc(100% - 40px);background:#000;border-radius:6px}
+#scrub{width:min(100%,720px)}
+#side{grid-area:side;background:#161920;border-left:1px solid #23262e;overflow:auto}
+#tabs{display:flex;flex-wrap:wrap;gap:4px;padding:8px}
+#tabs button.on{background:#4a64d8;border-color:#4a64d8}
+#panel{padding:8px 12px;display:flex;flex-direction:column;gap:10px}
+#panel label{display:flex;flex-direction:column;gap:4px;font-size:12px;opacity:.9}
+#panel .row{display:flex;gap:6px;flex-wrap:wrap}
+#panel input[type=text],#panel input[type=number]{background:#0f1115;border:1px solid #30343f;border-radius:6px;padding:6px}
+.hint{opacity:.6;font-size:12px}
+#tl{grid-area:tl;background:#161920;border-top:1px solid #23262e;padding:12px;display:flex;gap:4px;align-items:flex-start;overflow-x:auto}
+.clip{flex:none;height:72px;min-width:60px;background:#2a3568;border:2px solid transparent;border-radius:6px;padding:6px;overflow:hidden;cursor:pointer;font-size:12px}
+.clip.on{border-color:#8fa4ff}
+#drop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000a;font-size:24px;z-index:9}
