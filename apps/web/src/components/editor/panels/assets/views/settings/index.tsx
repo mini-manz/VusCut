@@ -38,11 +38,17 @@ function isSettingsView(value: string): value is SettingsView {
 	return value === "project-info" || value === "background";
 }
 
+// Keyed by "width x height" so every preset can have a friendly name.
 const PRESET_LABELS: Record<string, string> = {
-	"1:1": "1:1",
-	"16:9": "16:9",
-	"9:16": "9:16",
-	"4:3": "4:3",
+	"1920x1080": "16:9 · YouTube, Landscape",
+	"1080x1920": "9:16 · TikTok, Reels, Shorts",
+	"1080x1080": "1:1 · Instagram Square",
+	"1080x1350": "4:5 · Instagram Portrait",
+	"1440x1080": "4:3 · Classic",
+	"1080x1440": "3:4 · Portrait",
+	"2560x1080": "21:9 · Ultrawide",
+	"1620x1080": "3:2 · Photo",
+	"1080x1620": "2:3 · Pinterest",
 };
 
 function areCanvasSizesEqual({
@@ -110,7 +116,7 @@ export function SettingsView() {
 		const ratio = dimensionToAspectRatio(preset);
 		return {
 			id: index.toString(),
-			label: PRESET_LABELS[ratio] ?? ratio,
+			label: PRESET_LABELS[`${preset.width}x${preset.height}`] ?? ratio,
 			ratio,
 			canvasSize: preset,
 		};
@@ -286,7 +292,7 @@ export function SettingsView() {
 							<div className="pb-2">
 								<AspectRatioItem
 									key="custom"
-									label="Custom"
+									label="Custom (width × height)"
 									previewIcon={<OcSquarePlusIcon />}
 									isSelected={isCustomSelected}
 									onClick={selectCustomCanvasSize}

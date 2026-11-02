@@ -1,19 +1,43 @@
 import { useSyncExternalStore } from "react";
 
-export const parseHash = (): string => {
-	const h = location.hash.replace(/^#/, "") || "/projects";
-	return h.startsWith("/") ? h : `/${h}`;
+// In-app routing only. The current "page" lives in memory, so the browser URL
+// never changes (important for about:blank). There is no browser history, so
+// the browser's own back/forward buttons have nothing to go to.
+
+const DEFAULT_ROUTE = "/projects";
+
+let current = DEFAULT_ROUTE;
+const previous: string[] = [];
+const listeners = new Set<() => void>();
+
+const emit = () => {
+	for (const listener of listeners) listener();
 };
 
 const subscribe = (cb: () => void) => {
-	addEventListener("hashchange", cb);
-	return () => removeEventListener("hashchange", cb);
+	listeners.add(cb);
+	return () => {
+		listeners.delete(cb);
+	};
 };
 
+// Kept under this name because the next/navigation shim re-exports it.
+export const parseHash = (): string => current;
+
 export const useRoute = () =>
-	useSyncExternalStore(subscribe, parseHash, () => "/projects");
+	useSyncExternalStore(subscribe, parseHash, () => DEFAULT_ROUTE);
 
 export const go = (path: string, replace = false) => {
-	if (replace) location.replace(`#${path}`);
-	else location.hash = path;
+	const next = path.startsWith("/") ? path : `/${path}`;
+	if (next === current) return;
+	if (!replace) previous.push(current);
+	current = next;
+	emit();
+};
+
+export const back = () => {
+	const last = previous.pop();
+	if (last === undefined) return;
+	current = last;
+	emit();
 };

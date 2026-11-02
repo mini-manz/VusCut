@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { go, parseHash, useRoute } from "../route";
+import { back, go, parseHash, useRoute } from "../route";
 
 const router = {
 	push: (p: string) => go(p),
 	replace: (p: string) => go(p, true),
-	back: () => history.back(),
-	forward: () => history.forward(),
+	back: () => back(),
+	forward: () => {},
 	refresh: () => {},
 	prefetch: () => {},
 };

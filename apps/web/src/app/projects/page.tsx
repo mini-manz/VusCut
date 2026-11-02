@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { EditorCore } from "@/core";
 import { MigrationDialog } from "@/project/components/migration-dialog";
-import { StoragePersistenceDialog } from "@/services/storage/components/storage-persistence-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,7 +65,6 @@ import { DeleteProjectDialog } from "@/project/components/delete-project-dialog"
 import { ProjectInfoDialog } from "@/project/components/project-info-dialog";
 import { RenameProjectDialog } from "@/project/components/rename-project-dialog";
 import { cn } from "@/utils/ui";
-import { ChangelogNotification } from "@/changelog/components/changelog-notification";
 const formatProjectDuration = ({
 	duration,
 }: {
@@ -106,8 +104,6 @@ export default function ProjectsPage() {
 	return (
 		<div className="bg-background min-h-screen">
 			<MigrationDialog />
-			<StoragePersistenceDialog />
-			<ChangelogNotification />
 			<ProjectsHeader />
 			<ProjectsToolbar projectIds={projectsToDisplay.map((p) => p.id)} />
 			<main className="mx-auto px-4 pt-2 pb-6 flex flex-col gap-4">
@@ -147,11 +143,9 @@ function ProjectsHeader() {
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem>
-								<BreadcrumbLink asChild>
-									<Link href="/" className="text-sm sm:text-base">
-										Home
-									</Link>
-								</BreadcrumbLink>
+								<span className="text-sm sm:text-base text-muted-foreground">
+									VusCut
+								</span>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
