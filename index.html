@@ -1,106 +1,46 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VusCut</title>
 <style>
-html,body{margin:0;height:100%;background:#0f1115;color:#e6e8ee;font:14px system-ui,sans-serif}
-#boot{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px}
-#bar{width:240px;height:6px;background:#23262e;border-radius:3px;overflow:hidden}
-#bar i{display:block;height:100%;width:0;background:#6c8cff;transition:width .15s}
-#msg{opacity:.7}
+html,body{margin:0;height:100%;background:#0f0f0f;color:#e6e6e6;font:14px system-ui,sans-serif}
+#boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#boot.hide{display:none}
+#bar{width:220px;height:5px;background:#252525;border-radius:3px;overflow:hidden}
+#bar i{display:block;height:100%;width:30%;background:#4a9cff;animation:s 1.1s ease-in-out infinite}
+@keyframes s{0%{margin-left:-30%}100%{margin-left:100%}}
+#err{color:#ff8080;max-width:520px;text-align:center}
 </style>
 </head>
 <body>
-<div id="boot"><b style="font-size:20px">VusCut</b><div id="bar"><i></i></div><div id="msg">Loading…</div></div>
-<script>
-(async()=>{
-const REPO={user:'mini-manz',repo:'VusCut',ref:'main'};
-const SOURCES=[
-  `https://raw.githubusercontent.com/${REPO.user}/${REPO.repo}/${REPO.ref}/`,
-  `https://cdn.jsdelivr.net/gh/${REPO.user}/${REPO.repo}@${REPO.ref}/`
-];
-const $=s=>document.querySelector(s);
-const msg=t=>{$('#msg').textContent=t};
-const prog=p=>{$('#bar i').style.width=(p*100)+'%'};
+<div id="boot"><b style="font-size:20px">VusCut</b><div id="bar"><i></i></div><div id="msg">Loading editor…</div></div>
+<div id="root"></div>
+<script type="module">
+// Where the built app lives. Pin REF to a tag or commit (e.g. "v0.4.1") for stable
+// releases; "main" can be cached by the CDN for a few hours.
+const REF = "main";
+const DEFAULT_BASE = `https://cdn.jsdelivr.net/gh/mini-manz/VusCut@${REF}/dist/`;
+const q = new URLSearchParams(location.search);
+let base = q.get("src") || DEFAULT_BASE;
+if (!base.endsWith("/")) base += "/";
 
-// tiny IndexedDB cache
-const db=await new Promise(res=>{
-  try{
-    const r=indexedDB.open('vuscut',1);
-    r.onupgradeneeded=()=>r.result.createObjectStore('f');
-    r.onsuccess=()=>res(r.result);
-    r.onerror=()=>res(null);
-  }catch(e){res(null)}
-});
-const idb=(mode,fn)=>new Promise(res=>{
-  if(!db)return res();
-  try{
-    const q=fn(db.transaction('f',mode).objectStore('f'));
-    q.onsuccess=()=>res(q.result);q.onerror=()=>res();
-  }catch(e){res()}
-});
-const cget=k=>idb('readonly',s=>s.get(k));
-const cset=(k,v)=>idb('readwrite',s=>s.put(v,k));
-
-async function fetchText(path){
-  let last;
-  for(const base of SOURCES){
-    try{
-      const r=await fetch(base+path,{cache:'no-cache'});
-      if(r.ok)return await r.text();
-      last=new Error(r.status+' '+path);
-    }catch(e){last=e}
-  }
-  throw last;
+const boot = document.getElementById("boot");
+const msg = document.getElementById("msg");
+try {
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href = base + "app.css";
+  document.head.append(css);
+  await import(base + "app.js");
+  boot.classList.add("hide");
+} catch (e) {
+  console.error(e);
+  document.getElementById("bar").remove();
+  msg.id = "err";
+  msg.textContent = "Could not load VusCut: " + (e && e.message ? e.message : e);
 }
-
-try{
-  let manifest;
-  try{
-    manifest=JSON.parse(await fetchText('manifest.json'));
-    cset('manifest',manifest);
-  }catch(e){
-    manifest=await cget('manifest');
-    if(!manifest)throw e;
-    msg('Offline, using cached copy…');
-  }
-
-  const files=manifest.files;
-  let done=0;
-  const sources=await Promise.all(files.map(async path=>{
-    const key=path;
-    const hit=await cget(key);
-    let text;
-    if(hit&&hit.v===manifest.version){text=hit.t}
-    else{
-      try{text=await fetchText(path);cset(key,{v:manifest.version,t:text});}
-      catch(e){if(hit)text=hit.t;else throw e}
-    }
-    prog(++done/files.length);
-    return text;
-  }));
-
-  msg('Starting…');
-  document.body.innerHTML='';
-  document.title='VusCut '+(manifest.version||'');
-  files.forEach((path,i)=>{
-    if(path.endsWith('.css')){
-      const s=document.createElement('style');
-      s.textContent=sources[i];document.head.append(s);
-    }else if(path.endsWith('.js')){
-      const s=document.createElement('script');
-      s.textContent=sources[i]+'\n//# sourceURL='+path;
-      document.body.append(s);
-    }
-  });
-  window.dispatchEvent(new Event('vuscut:ready'));
-}catch(e){
-  msg('Could not load VusCut: '+e.message+'. Check your connection and reload.');
-  $('#msg').style.color='#ff8080';
-}
-})();
 </script>
 </body>
 </html>
